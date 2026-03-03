@@ -1,7 +1,4 @@
----
-title: "01: MundaMail"
-description: "Free mailbox for everyone."
----
+# Case Study: MundaMail
 
 ## Background
 
