@@ -56,7 +56,7 @@ A requirement is architecturally significant if it:
 | ASR ID | Description | Source |
 |--------|-------------|--------|
 | ASR-011 | The API bridge that translates REST calls to IMAP/SMTP commands is a core architectural component — it defines the system boundary between modern clients and legacy email protocols | F-MM-104 |
-| ASR-012 | Integration with government identity systems via LDAP/SAML requires a federated identity layer | SQ-MM (Interoperability) |
+| ASR-012 | Integration with government identity systems via LDAP/SAML requires a federated identity layer | Interoperability |
 
 > **Architectural implication:** The REST-to-IMAP/SMTP bridge is a key architectural component that must be designed for extensibility as protocols evolve.
 
