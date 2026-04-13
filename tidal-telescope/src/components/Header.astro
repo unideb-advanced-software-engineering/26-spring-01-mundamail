@@ -1,0 +1,14 @@
+---
+import Default from '@astrojs/starlight/components/Header.astro';
+---
+
+<Default {...Astro.props}>
+  <slot />
+</Default>
+
+<script>
+  document.querySelectorAll('a[href*="github.com"]').forEach(link => {
+    link.setAttribute('target', '_blank');
+    link.setAttribute('rel', 'noopener noreferrer');
+  });
+</script>

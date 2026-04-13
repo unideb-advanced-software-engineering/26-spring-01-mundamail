@@ -1,0 +1,45 @@
+---
+title: Architectural Style
+description: The architectural styles chosen for the project are as follows
+---
+
+
+Event-driven architecture.
+Modular monolith.
+
+## Why two styles?
+Munda-Mail (as a complete system) can be modeled into one deployable unit with clean internal boundaries, and
+asynchronous event flow for everything that touches performance, compliance, and scale with different quality
+characteristics and ASRs:
+
+Auth Module, Messaging Module. API bridge, Admin Module
+Role Based Access Control (RBAC) Module, Attachment Check Module
+
+Pure microservices approach is over-engineered for a government messaging platform operated by a single team,
+while a classic monolith can't meet the performance and audit ASRs. The hybrid sits in the sweet spot.
+
+## Why EDA?
+### Fit
+EDA decouples API response from delivery; Messaging queue partitions handle burst load
+
+The system must handle high-volume, high-concurrency workloads without making the caller wait. The message queue
+solves all three through the same core mechanism, decouple the act of accepting work from the act of doing work.
+
+## Trade-offs
+However, the following points should not be overlooked:
+
+T.B.D
+
+## Why a Modular Monolith?
+### Fit
+Module boundaries without network contracts guarantees safe cross-module refactoring
+
+low cost,
+simplicity,
+maintainability.
+The modular monolith architectural style perfectly meets these quality criteria.
+
+## Trade-offs
+At the same time, we must be mindful of the following trade-offs:
+
+T.B.D
