@@ -6,36 +6,41 @@ import starlight from '@astrojs/starlight';
 export default defineConfig({
 	integrations: [
 		starlight({
-			  components: {
+				components: {
     					Header: './src/components/Header.astro',
   						},
-			title: 'Zamunda',
+			title: 'Munda Mail',
 			social: [{ 	icon: 'github', 
 						label: 'GitHub', 
 						href: 'https://github.com/unideb-advanced-software-engineering/26-spring-01-mundamail',
 						
 					}],
 			sidebar: [
-				{ label: 'Munda Mail',
+				{ label: 'Requirements',
 					items: [
-						{ label: 'Case Study', slug: 'munda-mail/case-study' },
-						{ label: 'asr', slug: 'munda-mail/asr' },
-						{ label: 'as', slug: 'munda-mail/as' },
-						{ label: 'ac', slug: 'munda-mail/ac' },
+						{ label: 'Case Study', slug: 'requirements/case-study' },
+						{ label: 'asr', slug: 'requirements/asr' },
+						{ label: 'ac', slug: 'requirements/ac' },
 					]
 				 },
 				
 				{
-					label: 'Guides',
+					label: 'architecture',
 					items: [
 						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', slug: 'guides/example' },
+						{ label: 'as', slug: 'architecture/as' },
 				
 					],
 				},
 				{
-					label: 'Reference',
-					autogenerate: { directory: 'reference' },
+					label: 'adrs',
+					items: [
+						{ label: 'adr-001', slug: 'adrs/adr-001' },
+						{ label: 'adr-002', slug: 'adrs/adr-002' },
+						{ label: 'adr-003', slug: 'adrs/adr-003' },
+						{ label: 'adr-004', slug: 'adrs/adr-004' },
+
+					],
 				},
 			],
 		}),
