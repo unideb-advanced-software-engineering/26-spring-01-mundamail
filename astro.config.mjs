@@ -24,6 +24,7 @@ export default defineConfig({
                     { label: 'Case Study', slug: 'requirements/case-study' },
                     { label: 'asr', slug: 'requirements/asr' },
                     { label: 'ac', slug: 'requirements/ac' },
+                    { label: 'SRS', slug: 'requirements/srs' },
                 ]
              },
             
@@ -45,6 +46,7 @@ export default defineConfig({
 
                 ],
             },
+
         ],
 		}), react()],
 });
