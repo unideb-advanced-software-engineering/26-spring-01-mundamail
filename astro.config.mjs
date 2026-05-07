@@ -7,6 +7,9 @@ import react from '@astrojs/react';
 // https://astro.build/config
 export default defineConfig({
 
+    site: "https://unideb-advanced-software-engineering.github.io",
+    base: "/26-spring-01-mundamail",
+
 
     integrations: [starlight({
             components: {
