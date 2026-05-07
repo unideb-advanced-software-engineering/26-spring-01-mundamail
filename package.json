@@ -3,9 +3,10 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
+    "build:diagrams": "node node_modules/likec4/bin/likec4.mjs build . --output public/diagrams/ --base /diagrams/ --use-hash-history",
+    "dev": "npm run build:diagrams && astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "npm run build:diagrams && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -20,6 +21,6 @@
     "sharp": "^0.34.2"
   },
   "devDependencies": {
-    "likec4": "^1.20.0"
+    "likec4": "^1.38.1"
   }
 }

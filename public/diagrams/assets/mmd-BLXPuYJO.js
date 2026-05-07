@@ -1,0 +1,1 @@
+import{_ as t}from"./main-B4Gnb4rH.js";let n={default:()=>t(()=>import("./mmd-qkOtr0P9.js"),[])};async function a(o){const r=n[o];if(!r)throw new Error("Unknown projectId: "+o);return await r()}export{a as loadMmdSources,n as loadMmdSourcesFn};

@@ -1,0 +1,1 @@
+import{_ as t}from"./main-BiKp-LNs.js";let n={default:()=>t(()=>import("./model-DL4770cE.js"),[])};async function a(o){const r=n[o];if(!r)throw new Error("Unknown projectId: "+o);return await r()}export{a as loadModel,n as loadModelFn};
