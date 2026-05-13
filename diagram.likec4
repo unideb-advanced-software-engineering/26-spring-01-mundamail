@@ -1,4 +1,3 @@
- 
 specification {
     element externalClient {
         style {
@@ -6,205 +5,280 @@ specification {
             color gray
         }
     }
-
+    element system {
+        style {
+            shape rectangle
+            color blue
+        }
+    }
     element edgeLayer {
-      style {
-        shape component
-        color indigo
-      }
+        style {
+            shape rectangle
+            color indigo
+        }
     }
-    element eventLayer{
-      style {
-
-        color sky
-      }
+    element eventLayer {
+        style {
+            color sky
+        }
     }
-
-    element processingLayer{
-      style {
-        color green
-      }
+    element processingLayer {
+        style {
+            color green
+        }
     }
-
-    element persistenceLayer{
-      style {
-        color amber
-      }
+    element persistenceLayer {
+        style {
+            color amber
+        }
     }
-    element worker{
-      style {
-
-        color red
-      }
+    element worker {
+        style {
+            color red
+        }
     }
-    element dataBase{
-      style {
-        shape cylinder
-        color gray
-      }
+    element dataBase {
+        style {
+            shape cylinder
+            color gray
+        }
     }
-
     element module {
-      style {
-        color sky
-      }
+        style {
+            color sky
+        }
     }
-    element queue{
-      style {
-        shape queue
-        color sky
-      }
+    element queue {
+        style {
+            shape queue
+            color sky
+        }
     }
-
     element frontend {
-      style {
-        shape browser
-        color indigo
-      }
+        style {
+            shape browser
+            color indigo
+        }
     }
     element mobile {
-      style {
-        shape mobile
-        color indigo
-      }
+        style {
+            shape mobile
+            color indigo
+        }
     }
-    element user {
-      style {
-        shape person
-        color muted
-      }
-    }
-
-
 }
 
 model {
-  govAgency = module 'Gov Agency' {
-    description 'REST CLIENT'
-  }
-  user = user 'Web/Mobile Client' {
-    description 'User & Admin Interfaces'
 
-    userMobile = mobile 'Mobile App' {
-        description 'Native mobile interface'
+    // ── External Clients ──────────────────────────────────────────
+    govAgency = externalClient 'Gov Agency' {
+        description 'REST Client'
     }
 
-    userWeb = frontend 'Web Client' {
-        description 'Browser-based UI'
-    }
-
-    admin = frontend 'Admin Portal' {
-        description 'Administrative interface'
-    }
-    }
-
-  userMobile -> APIGateway 'implements'
-  userWeb -> APIGateway 'implements'
-  admin -> APIGateway 'implements'
-  govAgency -> APIGateway 'intergrates'
-
-
-
-  edgelayer = edgeLayer{
-      APIGateway = edgeLayer 'API Gateway' {
-        description 'TLS termination, Rate limiting and Request routing '
-      }
-  }
-  eventlayer = eventLayer{
-    identityServer = module 'Identity Server' {
-      description 'OAuth 2.0 , LDAP/SAML'
-      }
-
-    roleModule = module 'RBAC Module' {
-      description 'Role-based access control'
-      }
-
-    eventBus = queue 'Event Bus' {
-        description 'Topics: msg.inbound, msg.outbound, msg.audit, msg.dlq'
-
-
-    }
-  }
-
-    APIGateway -> identityServer
-    APIGateway -> eventBus
-    APIGateway -> roleModule
-
-    ProcessingLayer = processingLayer{
-
-      inspector = worker 'Content Inspector'{
-        description 'Blocks .exe .bat .sh at ingestion point'
+    user = externalClient 'Web/Mobile Client' {
+        description 'User & Admin Interfaces'
+        userMobile = mobile 'Mobile App' {
+            description 'Native iOS/Android'
         }
-      workers = worker 'Message Workers'{
-        description 'Async consumers, DLQ, Retry & backoff logic'
+        userWeb = frontend 'Web Client' {
+            description 'Browser-based UI'
         }
-      bridge = worker 'REST --> SMTP Bridge'{
-        description 'Translates REST calls to IMAP/SMTP commands'
+        admin = frontend 'Admin Portal' {
+            description 'Administrative interface'
         }
-      logger = worker 'Audit Logger'{
-        description 'Tamper-evident log All API calls & admin events'
+    }
+
+    // ── Government Messaging System ───────────────────────────────
+    gms = system 'Government Messaging System' {
+        description 'Secure government email platform'
+
+        // ── Edge Layer ────────────────────────────────────────────
+        APIGateway = edgeLayer 'API Gateway' {
+            description 'TLS termination · OAuth 2.0 · Attach. inspection '
+
+            tlsTermination = module 'TLS 1.2+ Termination' {
+                description 'Decrypt · enforce cipher suites '
+            }
+            oauthValidation = module 'OAuth 2.0 Token Validation' {
+                description 'Verify Bearer token · reject 401 '
+            }
+            attachmentInspection = module 'Attachment Inspection' {
+                description 'Block .exe .bat .sh '
+            }
+            rejectDLQ = module 'Reject + DLQ' {
+                description '401 unauthorized · 422 blocked attachment'
+            }
+
+            tlsTermination -> oauthValidation 'decrypt & validate'
+            oauthValidation -> attachmentInspection 'token valid'
+            oauthValidation -> rejectDLQ '401'
+            attachmentInspection -> rejectDLQ '422'
         }
 
+        // ── Modular Monolith ──────────────────────────────────────
+        monolith = processingLayer 'Modular Monolith' {
+            description 'Single deployable unit · Auth · Messaging · RBAC · API bridge'
+
+            authModule = module 'Auth Module' {
+                description 'OAuth 2.0 · LDAP/SAML'
+            }
+            messagingModule = module 'Messaging Module' {
+                description 'Inbox · send · read state'
+            }
+            apiBridge = module 'API Bridge' {
+                description 'REST → SMTP/IMAP translation'
+            }
+            rbacModule = module 'RBAC' {
+                description 'Role-based access control'
+            }
+            attachCheck = module 'Attach. Check' {
+                description 'Block .exe .bat .sh at ingestion'
+            }
+            adminModule = module 'Admin Module' {
+                description 'Admin actions · audit events'
+            }
+        }
+
+        // ── Event Broker — Kafka ──────────────────────────────────
+        eventBroker = eventLayer 'Event Broker — Kafka' {
+            description 'Async fan-out · partitioned topics · durable log'
+
+            msgSendTopic = queue 'message.send.requested' {
+                description 'Partitioned topic · parallel fan-out → 50k / 10 min'
+
+                partition0 = module 'Partition 0' { description 'Message partition' }
+                partition1 = module 'Partition 1' { description 'Message partition' }
+                partition2 = module 'Partition 2' { description 'Message partition' }
+                partitionN = module 'Partition N' { description 'Message partition · ...' }
+            }
+
+            auditTopic = queue 'msg.audit' {
+                description 'Immutable append-only event log'
+            }
+
+            dlqTopic = queue 'msg.dlq' {
+                description 'Dead letter queue · retry & backoff'
+            }
+
+            deliveryWorker0 = worker 'Delivery Worker 0' {
+                description 'Async consumer · drain at own pace'
+            }
+            deliveryWorker1 = worker 'Delivery Worker 1' {
+                description 'Async consumer · drain at own pace'
+            }
+            deliveryWorker2 = worker 'Delivery Worker 2' {
+                description 'Async consumer · drain at own pace'
+            }
+            deliveryWorkerN = worker 'Delivery Worker N' {
+                description 'Async consumer · scale consumers'
+            }
+
+            auditLogWriter = worker 'Audit Log Writer' {
+                description '12-month hot store'
+            }
+
+            archiveWriter = worker 'Archive Writer' {
+                description 'Cold-tier offload'
+            }
+
+            applicationDB = dataBase 'Application DB' {
+                description 'Current state projection'
+            }
+
+            msgSendTopic.partition0 -> deliveryWorker0 'fan-out'
+            msgSendTopic.partition1 -> deliveryWorker1 'fan-out'
+            msgSendTopic.partition2 -> deliveryWorker2 'fan-out'
+            msgSendTopic.partitionN -> deliveryWorkerN 'fan-out'
+
+            auditTopic -> auditLogWriter 'consumer group'
+            auditTopic -> archiveWriter 'consumer group'
+            auditTopic -> applicationDB 'consumer group'
+        }
+
+        // ── Persistence Layer ─────────────────────────────────────
+        messageStore = persistenceLayer 'Message Store' {
+            emailStore = dataBase 'Active Message Store' {
+                description 'AES-256 at rest · IMAP-accessible · user-facing inbox / sent'
+            }
+        }
+
+        auditStorage = persistenceLayer 'Audit Storage' {
+            description '12-month hot store'
+            auditStore = dataBase 'Audit Store (Hot)' {
+                description '12 months · append-only'
+            }
+        }
+
+        archiveStorage = persistenceLayer 'Email Archive' {
+            description '5-year cold store'
+            coldArchive = dataBase 'Cold Archive' {
+                description '5 years · Separate storage node'
+            }
+            replica = dataBase 'Replica / Backup' {
+                description 'Daily snapshots · failover'
+            }
+        }
+
+        // ── Internal relationships ────────────────────────────────
+        APIGateway.attachmentInspection -> monolith 'all checks passed'
+
+        monolith.messagingModule -> eventBroker.msgSendTopic 'publish → returns 202'
+        monolith.apiBridge -> eventBroker.msgSendTopic 'publish → returns 202'
+
+        monolith.authModule -> eventBroker.auditTopic 'login.attempted'
+        monolith.messagingModule -> eventBroker.auditTopic 'message.sent / read'
+        monolith.adminModule -> eventBroker.auditTopic 'admin.action.performed'
+        APIGateway.attachmentInspection -> eventBroker.auditTopic 'attachment.blocked'
+
+        eventBroker.deliveryWorker0 -> messageStore.emailStore 'write'
+        eventBroker.deliveryWorker1 -> messageStore.emailStore 'write'
+        eventBroker.deliveryWorker2 -> messageStore.emailStore 'write'
+        eventBroker.deliveryWorkerN -> messageStore.emailStore 'write'
+
+        eventBroker.auditLogWriter -> auditStorage.auditStore 'write'
+        eventBroker.archiveWriter -> archiveStorage.coldArchive 'cold offload'
+        eventBroker.applicationDB -> messageStore.emailStore 'state projection'
     }
 
-
-    PersistenceLayer = persistenceLayer{
-      emailStore = dataBase 'Email Store'{
-        description 'AES 256 at rest IMAP-accessible mailboxes'
-      }
-
-      archive = dataBase 'Archive DB'{
-        description '5-year retention tier Separate storage node'
-      }
-
-      replica = dataBase 'Replica/Backup'{
-        description 'Daily snapshots and failovers'
-      }
-
-      logStore = dataBase 'Audit Log Store'{
-        description 'Regulatory compliant 12-month retention'
-      }
-
-      eventBus -> inspector
-      eventBus -> workers
-      eventBus -> bridge
-      eventBus -> logger
-      inspector -> emailStore
-      workers -> archive
-      bridge -> replica
-      logger -> logStore
-
-    }
-
-
-
+    // ── External → System relationships ──────────────────────────
+    govAgency -> gms 'Integrates via REST'
+    user -> gms 'API calls via HTTPS'
 }
 
-
 views {
-  view systemContextDiagram {
-    title 'C1: System Context'
-    include *
-  }
-  view webClientStructure {
-    title 'C4: Web/Mobile Client - Internal'
-    include user.userMobile, user.userWeb, user.admin
-  }
 
-  view containerView {
-    title 'C2: System Containers'
-    include edgelayer, eventlayer, ProcessingLayer, PersistenceLayer
-  }
+    view systemContext {
+        title 'C1: System Context'
+        include govAgency, user, gms
+    }
 
-  view eventLayerComponents {
-    title 'C3: Event Layer - Components'
-    include eventlayer.*
-  }
+    view containerView of gms {
+        title 'C2: System Containers'
+        include *
+    }
 
-  view processingLayerComponents {
-    title 'C3: Processing Layer - Components'
-    include ProcessingLayer.*
-  }
+    view apiGatewayView of APIGateway {
+        title 'C3: API Gateway — Request Pipeline'
+        include *
+    }
 
+    view monolithView of monolith {
+        title 'C3: Modular Monolith — Modules'
+        include *
+    }
 
+    view kafkaFanoutView of eventBroker {
+        title 'C3: Kafka — Message Delivery Fan-out'
+        include *
+    }
+
+    view eventSourcingView {
+        title 'C3: Event Sourcing — Audit Pipeline'
+        include authModule, messagingModule, adminModule, attachmentInspection, auditTopic, auditLogWriter, archiveWriter, applicationDB, auditStore, coldArchive, emailStore
+    }
+
+    view webClientView of user {
+        title 'C4: Web / Mobile Client — Interfaces'
+        include *
+    }
 }
